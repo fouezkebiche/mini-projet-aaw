@@ -1,0 +1,544 @@
+create 2 folders: frontend and backend
+cd frontend :
+npm create vite@latest .
+npm install
+npm run dev
+
+cd ..(the route):
+npm init -y (will give us the package.json file)
+in the package.json file we change from ("main": "index.js",) to ("main": "server.js",)
+
+in the backend file we create a file called (server.js)
+npm install express dotenv cookie-parser bcryptjs mongoose socket.io jsonwebtoken
+(Express: Express is a web application framework for Node.js. It provides a robust set of features to develop web and mobile applications. With Express, you can create APIs, handle HTTP requests and responses, define routes, and much more. It simplifies the process of building web applications in Node.js by providing a higher level of abstraction.
+
+Dotenv: Dotenv is a zero-dependency module that loads environment variables from a .env file into process.env. This is commonly used to manage configuration settings for applications. Instead of hardcoding sensitive information like database URLs, API keys, or other configuration options directly into your code, you can store them in a .env file and use dotenv to load them into your Node.js application.
+
+Cookie-parser: This is a middleware for Express that parses cookies attached to the client request object. Cookies are small pieces of data sent from a website and stored on the user's computer by the user's web browser while the user is browsing. cookie-parser simplifies the handling of these cookies in your Express application.
+
+Bcryptjs: Bcryptjs is a library used for hashing passwords. When storing passwords in a database, it's essential to hash them first. Hashing is a one-way function that converts plain text (like a password) into a string of characters that cannot be reversed. This enhances security because even if a database is compromised, the attacker won't immediately have access to the actual passwords. Bcryptjs provides an easy way to hash passwords in a Node.js application.
+
+Mongoose: Mongoose is an Object Data Modeling (ODM) library for MongoDB and Node.js. It provides a straightforward, schema-based solution to model application data. With Mongoose, you can define schemas, which are blueprints for your data structure, and use them to interact with MongoDB. It simplifies the interaction with MongoDB by providing validation, type casting, and other features.
+
+Socket.io: Socket.io is a library that enables real-time, bidirectional and event-based communication between the browser and the server. It uses WebSockets under the hood, but it can also gracefully degrade to other transport protocols if WebSockets are not available. This makes it very useful for building real-time applications such as chat applications, online gaming, collaborative editing, and more.
+
+Jsonwebtoken: JSON Web Token (JWT) is a compact, URL-safe means of representing claims to be transferred between two parties. It's commonly used for authentication and information exchange in web development. The jsonwebtoken package provides an easy way to create and verify JWTs in Node.js applications. When a user logs in, for example, you might create a JWT to send back to the client, which can then be included in subsequent requests to authenticate and authorize the user.)
+
+in the package.json we change the scripts from("test": "echo \"Error: no test specified\" && exit 1")to ("server": "node backend/server.js")
+
+npm install nodemon --save-dev
+"scripts": {
+"server": "nodemon backend/server.js"
+},
+
+The dotenv package in Node.js is used to manage environment variables in your application. Environment variables are variables outside of your codebase that can be accessed by your application. They are often used to store configuration settings, sensitive information like API keys or database passwords, or any data that might change between development, testing, and production environments
+
+const dotenv = require("dotenv");
+dotenv.config();
+This line tells dotenv to read the .env file in the root of your project (where you would typically store your environment variables) and load them into process.env.
+const PORT = process.env.PORT || 5000;
+
+to change from this :
+(const express = require("express");
+const dotenv = require("dotenv");) to this:
+(import express from "express";
+import dotenv from "dotenv";) in the package.json we add :("type":"module",)under the Scripts
+
+insted of create each rout alone with the function app.get("/api/auth/....",(req,res)=>{console.log("... route")});) we use the express by:
+inside the backend folder we create a folder called (routes) and inside the routes we create a file called(auth.routes.js) and we use this :
+(import express from "express";
+
+const router = express.Router();
+
+router.get("/login", (req, res) => {
+res.send("login route");
+});
+
+export default router;
+) and we create as much as we want and in the server part we replace it with:
+(import authRoutes from "./routes/auth.routes.js";
+app.use("/api/auth", authRoutes);)
+app.use("/api/auth", authRoutes);: This tells the Express app to use the authRoutes router for any paths starting with /api/auth. For example, if authRoutes has a route /login, it would be accessible at /api/auth/login.
+
+now in the auth.routers.js file we have the function of the signup and login , logout and each one will have like a loooot of lines (that file should only have the routes) so what we could do is we use controllers:
+so in the backend folder we create a folder (controllers) and inside of it a file (auth.controller.js)
+in the auth.controller.js we have :
+(export const signup = (req, res) => {
+res.send("signup route");
+console.log("signup route");
+};
+
+) and in the auth.routes.js we have :
+(import { signup, login, logout } from "../controllers/auth.controllers.js";
+import connectToMongoDB from "./backend/db/connectToMongoDB.js"
+router.get("/signup", signup);
+)
+sooo now we start with the server that have the /api/auth path as a start it called the authRouter that is the auth.routes.js file that have the pages and each path(/login , /logout...) and n this file they call the function that they are in the auth.controller.js file with all the functions.
+
+postmen:
+1-create a workspace(next / give a name / create)
+2-add 3 collections(names:AUTH,MESSAGES,USERS)
+AUTH: add request(name:signup/ method : post / give it the url/ raw and select json)
+
+
+
+MongoDB:
+1-create a project (give it a name (chat-app))
+2- create a deployment
+3- chose free(create)
+4-they give us the username and the password so we copy and past in the (.env) file
+5-add ip adress (0.0.0.0) (add Entry) (Finish and close) (Go to Overview)
+6-CONNECT
+7-Drivers
+8-copy the connction string (in the 3 part(twil))
+9-in the (.env) file we create a new variable (MONGO_DB_URI=(give it what we copied in the 8 part and replace the password word with the password the we copid in the 4 part and give a name like chat-app-db between the /?) ex: MONGO_DB_URI=mongodb+srv://kebichefouez:0vRxyGy9KpIE4LaY@cluster0.x7afe22.mongodb.net/chat-app-db?retryWrites=true&w=majority&appName=Cluster0
+)
+
+
+connection to MongoDb:
+1- in the backend folder we create (db) folder 
+2- inside the db folder we create (connectToMongoDB.js) file
+3- connectToMongoDB.js will have :
+(import mongoose from "mongoose";
+
+const connectToMongoDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_DB_URI);
+    console.log("Connected to MongoDB");
+  } catch (error) {
+    console.log("Error connecting to MongoDB", error.message);
+  }
+};
+
+export default connectToMongoDB;
+)
+
+
+expaline the function of the connectToMongoDB.js:
+
+
+(
+Import Mongoose:
+
+import mongoose from "mongoose";: This imports the Mongoose library, which provides an interface for interacting with MongoDB in an object-oriented way.
+Define connectToMongoDB Function:
+
+const connectToMongoDB = async () => { ... };: This defines an asynchronous function named connectToMongoDB. Using async allows the use of await inside the function for handling promises.
+Try-Catch Block:
+
+try { ... } catch (error) { ... }: This is a standard JavaScript try-catch block for error handling.
+Mongoose Connection:
+
+await mongoose.connect(process.env.MONGO_DB_URI);: This line attempts to connect to MongoDB using the connect method from Mongoose. process.env.MONGO_DB_URI is an environment variable that should contain the URI for your MongoDB database. This URI typically includes information like the host, port, database name, username, and password.
+
+await is used here because mongoose.connect() returns a promise. await waits for this promise to either resolve (if the connection is successful) or reject (if there's an error).
+)
+
+and in the (server.js) file we update by changeing by calling the connectToMongoDB function :
+(app.listen(PORT, () => {
+    connectToMongoDB();
+    console.log(`Server is Running on port ${PORT}`);
+  });)
+
+
+
+
+creating the database:
+1-click database 
+2-Browse collections
+3-inside the backend folder we create a (models) folder
+4-inside the models folder we create (user.model.js)
+5-creating the fields of the user by this :
+(import mongoose from "mongoose";
+
+const userSchema = mongoose.Schema({
+  fullName: {
+    type: String,
+    require: true,
+  },
+  username: {
+    type: String,
+    require: true,
+    unique: true,
+  },
+  password: {
+    type: String,
+    require: true,
+    minlength: 6,
+  },
+  gender: {
+    type: String,
+    require: true,
+    enum: ["male", "female"],
+  },
+  profilePic: {
+    type: String,
+    default: "",
+  },
+});
+
+const User = mongoose.model("User", userSchema);
+
+export default User;
+)This code is defining a Mongoose schema for a user object that will be stored in a MongoDB database.
+The user schema has fields for fullName, username, password, gender, and profilePic.
+After defining the schema, a Mongoose model named "User" is created based on this schema.
+Finally, the User model is exported to be used in other parts of the application.
+
+
+
+after making the schema (our user database) now we create the signup function (in the auth.controller.js file) and we test it with postmen by :
+{
+    //fullName, username, password, confirmPassword, gender
+    "fullName":"kebiche fouez",
+    "username":"fouezK",
+    "password":"123456",
+    "confirmPassword":"123456",
+    "gender":"male"
+}
+
+
+after i will hash the password so we cant see the users password
+(
+      //HASH PASSWORD HERE
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+)
+
+const salt = await bcrypt.genSalt(10);
+
+bcrypt.genSalt(10) is a function that generates a salt, which is a random value used in hashing algorithms like bcrypt to increase security.
+The 10 parameter is the cost factor, which determines the computational complexity of the hashing. Higher numbers make the hashing process more computationally intensive.
+await is used because bcrypt.genSalt() is an asynchronous function that returns a Promise, and await is used to wait for the Promise to resolve before continuing.
+const hashedPassword = await bcrypt.hash(password, salt);
+
+bcrypt.hash(password, salt) is a function that takes the password and the salt generated in the previous step and computes the hash of the password.
+The resulting hashedPassword is the securely hashed version of the original password.
+Like before, await is used because bcrypt.hash() is an asynchronous function that returns a Promise, and await is used to wait for the Promise to resolve before continuing.
+
+
+
+
+
+Generate Token:(cookies)
+in the backend we create a folder called (utils) and inside of it we create file (generateToken.js)
+1- open a new terminal  and make a type of Git bash
+2- then we write in the terminal : (openssl rand -base64 32)   which will give us a secure secret
+3- in the (.env) file we add (JWT_SECRET=<the secure secret from the 2)
+4- in the generateToken.js file we write our function.
+(
+  import jwt from "jsonwebtoken";
+
+const generateTokenAndCookie = (userId, res) => {
+  const token = jwt.sign({ userId }, process.env.JWT_SECRET, {
+    expiresIn: "15d",
+  });
+
+  res.cookie("jwt", token, {
+    maxAge: 15 * 24 * 60 * 60 * 1000, //MS
+    httpOnly: true, //prevent XSS attacks cross-site scripting attacks
+    sameSite: "strict", // CSRF attacks cross-site request forgery attacks
+  });
+};
+
+export default generateTokenAndCookie;
+
+)
+import jwt from "jsonwebtoken";(This line imports the jsonwebtoken library, which is commonly used for creating and verifying JSON Web Tokens (JWTs) in Node.js applications.)
+const generateTokenAndCookie = (userId, res) => {(This function takes two parameters:
+
+userId: The ID of the user for whom the token is being generated.
+res: The response object, which is used to set the cookie.)
+const token = jwt.sign({ userId }, process.env.JWT_SECRET, {
+  expiresIn: "15d",
+});(Here, a JWT is created using the jwt.sign() method. It takes three main parameters:
+
+{ userId }: This is the payload of the token, typically containing information about the user. In this case, it contains the userId.
+process.env.JWT_SECRET: This is the secret key used to sign the token. It's recommended to store sensitive information like secret keys in environment variables (process.env).
+{ expiresIn: "15d" }: This specifies that the token will expire after 15 days. The expiresIn option takes a string with a time span, such as "1d" for one day or "7h" for seven hours.)
+res.cookie("jwt", token, {
+  maxAge: 15 * 24 * 60 * 60 * 1000, //MS
+  httpOnly: true, // Prevents client-side JavaScript from accessing the cookie
+  sameSite: "strict", // Helps prevent CSRF attacks
+});(This code sets a cookie named "jwt" in the response object res. It configures the cookie with the following options:
+
+maxAge: Specifies the maximum age of the cookie in milliseconds. In this case, it's set to 15 days.
+httpOnly: When true, this prevents client-side JavaScript from accessing the cookie. This is a security measure to help prevent cross-site scripting (XSS) attacks.
+sameSite: "strict": This attribute tells the browser to only send the cookie if the request is coming from the same site. This helps mitigate cross-site request forgery (CSRF) attacks.)
+
+
+
+
+
+login function:
+in the postmen we had in the AUTH just signup but now we add other one called login
+just a simple function in the auth.controller.js file
+
+logout function
+in the postmen we we add other one called logout
+(
+  res.cookie("jwt", "", { maxAge: 0 });
+) This line sets a cookie named "jwt" to an empty string with a maxAge of 0. This effectively deletes the JWT (JSON Web Token) cookie on the client-side, which is a common method to implement logout functionality in web applications that use JWTs for authentication.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+after complete the auth functions now we will start with the MESSAGES
+1-create the messages.model.js amd conversation.model.js files in the model folder
+2-make their schemas
+3- in the server.js file we add the (app.use("api/messages", messageRoutes))
+4- in the routes folder we create the messageRoutes.js file
+5-in the controllers folder we create the message.controller.js file the will have the sendMessage function
+6- in the postmen now we use the MESSAGES part by creating a new request called SEND MESSAGE 
+7- we create a folder called middleware that have a file called (protectRoute.js) this function will be added in the messages.routes.js file that should be runed before the sendMessage function to test if the user is loged in or not
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import jwt from "jsonwebtoken";
+
+const generateTokenAndCookie = (userId, res) => {
+  const token = jwt.sign({ userId }, process.env.JWT_SECRET, {
+    expiresIn: "15d",
+  });
+
+  res.cookie("jwt", token, {
+    maxAge: 15 * 24 * 60 * 60 * 1000, //MS
+    httpOnly: true, //prevent XSS attacks cross-site scripting attacks
+    sameSite: "strict", // CSRF attacks cross-site request forgery attacks
+    secure: process.env.NODE_ENV !== "development",
+  });
+};
+
+export default generateTokenAndCookie;
+What are Cookies?
+Cookies are small pieces of data that a server sends to the user's web browser. The browser then stores this data locally, and for every subsequent request to the same server, it sends this data back to the server. Cookies are commonly used for session management, user authentication, tracking, and personalization.
+
+Understanding the Code:
+The provided code is a JavaScript function that generates a JSON Web Token (JWT) and sets it as a cookie in the user's browser. Let's go through the code and understand each part:
+
+Importing JWT:
+javascript
+Copy code
+import jwt from "jsonwebtoken";
+This line imports the jsonwebtoken library, which is used for generating and verifying JSON Web Tokens (JWTs). JWTs are a secure way to transmit information between parties as a JSON object.
+
+Generating Token and Cookie:
+javascript
+Copy code
+const generateTokenAndCookie = (userId, res) => {
+  const token = jwt.sign({ userId }, process.env.JWT_SECRET, {
+    expiresIn: "15d",
+  });
+In this function, a JWT is generated using the jwt.sign method. It signs a payload (in this case, { userId }) with a secret key (process.env.JWT_SECRET) and sets an expiration time of 15 days (expiresIn: "15d"). This token will contain the user's userId information.
+
+Setting the Cookie:
+javascript
+Copy code
+  res.cookie("jwt", token, {
+    maxAge: 15 * 24 * 60 * 60 * 1000, //MS
+    httpOnly: true,
+    sameSite: "strict",
+    secure: process.env.NODE_ENV !== "development",
+  });
+};
+This part sets the generated token as a cookie in the response (res). Here's what each option means:
+
+res.cookie("jwt", token, ...) sets a cookie named "jwt" with the generated token.
+maxAge: 15 * 24 * 60 * 60 * 1000 sets the cookie to expire in 15 days (in milliseconds).
+httpOnly: true makes the cookie accessible only via HTTP(S) requests, preventing client-side JavaScript from accessing it. This enhances security and helps prevent XSS attacks.
+sameSite: "strict" restricts the cookie to be sent only in a first-party context, preventing CSRF attacks.
+secure: process.env.NODE_ENV !== "development" ensures the cookie is only sent over HTTPS in a production environment, adding another layer of security.
+Why Use It in Signup and Login Functions?
+Signup: After a user successfully signs up, you'd want to generate a token and set it as a cookie. This allows the user to stay authenticated when they move to other pages or make subsequent requests without having to log in again.
+
+Login: Similarly, after a user successfully logs in, you'd generate a new token (since the old one might have expired or been revoked during logout) and set it as a cookie. This updated token allows the user to access protected routes or resources.
+
+By calling generateTokenAndCookie in both the signup and login functions, you ensure that every time a user signs up or logs in, they receive a new JWT that's securely stored in their browser as a cookie. This simplifies subsequent interactions with the server, as the server can now authenticate the user based on the token in the cookie without the user having to re-enter credentials for every request.
+
+User
+what do u mean by this ( It signs a payload (in this case, { userId }) with a secret key (process.env.JWT_SECRET) )  and why do we need the secret key
+ChatGPT
+In the context of JSON Web Tokens (JWTs), the process of "signing" a token involves creating a digital signature using a secret key. Let's break down what this means:
+
+Signing a Payload
+When a JWT is created, it consists of three parts: a header, a payload, and a signature. The payload is where the actual data is stored. In the code snippet you provided:
+
+javascript
+Copy code
+const token = jwt.sign({ userId }, process.env.JWT_SECRET, {
+  expiresIn: "15d",
+});
+The jwt.sign function takes three main parameters:
+
+The payload: In this case, it's { userId }. The payload is a JSON object that contains the data you want to store in the token. For example, { userId: 123 } would store the user's ID.
+
+Secret Key: This is the second parameter (process.env.JWT_SECRET). The secret key is a piece of information known only to the server that is used to sign the token. It's crucial for verifying the authenticity of the token later on. The secret key should be kept confidential and should never be shared or exposed.
+
+Options: The third parameter in the jwt.sign function is an optional object where you can specify additional settings for the token, such as expiration (expiresIn: "15d").
+
+Why Do We Need the Secret Key?
+The secret key is a crucial part of JWT security. Here's why it's necessary:
+
+Token Verification: When the server receives a JWT from a client (e.g., in an HTTP request's Authorization header or as a cookie), it needs to verify that the token has not been tampered with. The server uses the same secret key used to sign the token to verify its authenticity. If the token was tampered with or is invalid (e.g., expired), the server can reject it.
+
+Preventing Forgery: The secret key ensures that the token was created by the trusted server and has not been modified by any unauthorized party. If someone tries to create a fake token without knowing the secret key, the server won't be able to verify it.
+
+Security: Keeping the secret key secret is essential for maintaining the security of the JWT system. If the secret key is compromised, attackers could create valid tokens and potentially gain unauthorized access to protected resources.
+
+In summary, the secret key is used to create a digital signature for the JWT. This signature allows the server to verify the authenticity and integrity of the token, ensuring that it hasn't been tampered with and that it was indeed issued by the trusted server.
+
+
+
+
+
+
+
+
+
+
+
+
+The code you provided is related to managing authentication state in a React application using context and hooks. Let's break down what each part does and why it's used in the application.
+
+AuthContext.js
+This file is responsible for creating the authentication context, providing a hook to consume the context, and creating a provider component for this context.
+
+Create Context:
+
+javascript
+Copy code
+export const AuthContext = createContext();
+This line creates a new context called AuthContext.
+
+useAuthContext Hook:
+
+javascript
+Copy code
+export const useAuthContext = () => {
+  return useContext(AuthContext);
+};
+This is a custom hook useAuthContext that allows components to consume the AuthContext and access its values.
+
+AuthContextProvider Component:
+
+javascript
+Copy code
+export const AuthContextProvider = ({ children }) => {
+  const [authUser, setAuthUser] = useState(
+    JSON.parse(localStorage.getItem("chat-user")) || null
+  );
+  return (
+    <AuthContext.Provider value={{ authUser, setAuthUser }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+This component is a provider for the AuthContext. It initializes the authUser state by retrieving it from localStorage or setting it to null if not found.
+The AuthContext.Provider component wraps its children components and provides the authUser state and setAuthUser function down the component tree.
+Why it's used in other pages
+SignUp.js:
+
+javascript
+Copy code
+import { useAuthContext } from "../context/AuthContext";
+The useAuthContext hook is imported here to access the authentication context. This allows SignUp to use the setAuthUser function to update the authentication state after a successful signup.
+
+useSignup.js:
+
+javascript
+Copy code
+import { useAuthContext } from "../context/AuthContext";
+Similar to SignUp, useSignup imports useAuthContext to get access to setAuthUser. After a successful signup, it updates the authentication state.
+
+App.js:
+
+javascript
+Copy code
+import { useAuthContext } from "./context/AuthContext";
+App imports useAuthContext to get the authUser state. Based on the authUser value, it decides whether to navigate to the home page or show the signup page.
+
+index.js:
+
+javascript
+Copy code
+import { AuthContextProvider } from "./context/AuthContext.jsx";
+Here, AuthContextProvider is imported to wrap the entire App component. This ensures that the authentication context is available to all components in the application hierarchy.
+
+Why use Context and Provider
+Using context in React allows you to share values like authentication state across the component tree without having to pass props down manually at every level. This is especially useful for global state management.
+
+Context: AuthContext provides a way to access the authentication state and related functions (like setAuthUser) from any component.
+
+Provider: AuthContextProvider initializes the context with an initial state (authUser) and provides a way to update this state (setAuthUser). This provider wraps the main App component, ensuring that any component in the app can consume this authentication context.
+
+In summary, this setup allows your components to easily access and update authentication-related information without the need for prop drilling, making your code cleaner and more maintainable.
+
+
+
+and this 2 lines what they do exactly(//localstorage
+      localStorage.setItem("chat-user", JSON.stringify(data));
+      //context
+      setAuthUser(data);)?
+ChatGPT
+These two lines of code are crucial for managing the authentication state in a React application using the provided AuthContext and AuthContextProvider.
+
+Let's break down what each line does:
+
+localStorage
+javascript
+Copy code
+localStorage.setItem("chat-user", JSON.stringify(data));
+This line stores the data object in the browser's localStorage under the key "chat-user".
+The JSON.stringify(data) converts the data object into a JSON string, which is then stored in the localStorage.
+This is typically done after a successful authentication process, where data likely contains information about the authenticated user, such as user details or tokens.
+setAuthUser
+javascript
+Copy code
+setAuthUser(data);
+setAuthUser is a function that is part of the useState hook used in the AuthContextProvider.
+This line sets the authUser state to the data object.
+In the AuthContextProvider, we have:
+javascript
+Copy code
+const [authUser, setAuthUser] = useState(
+  JSON.parse(localStorage.getItem("chat-user")) || null
+);
+Initially, authUser is set to whatever is in the "chat-user" key in localStorage. If it doesn't exist, authUser is set to null.
+By calling setAuthUser(data), you are updating the authUser state with the data received, which in this case is likely the user object after a successful login or signup.
+Why These Lines are Important
+localStorage: Storing the user data in localStorage allows the application to remember the user's authentication state even after a page refresh or when navigating to a different page within the same domain. This means that if the user closes the browser and comes back later, they will still be logged in.
+
+setAuthUser: Updating the authUser state with setAuthUser(data) is crucial for two reasons:
+
+It ensures that the authentication state is updated in the React application, so components that rely on authUser will re-render with the updated user information.
+Since authUser is part of the AuthContext, any component that uses the useAuthContext hook will now have access to the updated authentication state, allowing them to react accordingly (e.g., showing user-specific content, updating UI elements, etc.).
+These lines work together to update both the local storage for persistent data storage and the React state for managing the application's current authentication state. This approach ensures consistency between what the application displays (based on the context state) and what is stored for future visits (in localStorage).
